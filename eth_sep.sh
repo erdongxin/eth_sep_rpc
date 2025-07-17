@@ -58,6 +58,8 @@ Type=simple
 Restart=always
 RestartSec=5
 TimeoutStopSec=180
+LimitNOFILE=65535
+
 
 ExecStart=/usr/bin/geth \\
   --sepolia \\
@@ -100,6 +102,8 @@ Type=simple
 Restart=always
 RestartSec=5
 TimeoutStopSec=180
+LimitNOFILE=65535
+
 
 ExecStart=/usr/local/bin/lighthouse beacon_node \\
   --network sepolia \\
@@ -119,8 +123,19 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \\
 WantedBy=multi-user.target
 EOF
 
+# 设置系统全局文件数限制
+sudo sed -i '/^root.*nofile/d' /etc/security/limits.conf
+echo -e "root soft nofile 65535\nroot hard nofile 65535" | sudo tee -a /etc/security/limits.conf
+
+# 确保 PAM 启用 limits
+if ! grep -q "pam_limits.so" /etc/pam.d/common-session; then
+  echo "session required pam_limits.so" | sudo tee -a /etc/pam.d/common-session
+fi
+
 echo "🔄 重新加载 systemd..."
 sudo systemctl daemon-reload
+sudo systemctl daemon-reexec
+
 
 echo "✅ 启用并启动服务..."
 sudo systemctl enable geth.service
