@@ -60,7 +60,6 @@ RestartSec=5
 TimeoutStopSec=180
 LimitNOFILE=65535
 
-
 ExecStart=/usr/bin/geth \\
   --sepolia \\
   --datadir /data/geth_sepolia \\
@@ -83,6 +82,7 @@ ExecStart=/usr/bin/geth \\
   --metrics.port 6060 \\
   --cache=2048 \\
   --maxpeers 50 \\
+  --rpc.txfeecap 0
 
 [Install]
 WantedBy=multi-user.target
@@ -103,7 +103,6 @@ Restart=always
 RestartSec=5
 TimeoutStopSec=180
 LimitNOFILE=65535
-
 
 ExecStart=/usr/local/bin/lighthouse beacon_node \\
   --network sepolia \\
