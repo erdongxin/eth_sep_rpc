@@ -6,6 +6,14 @@ echo "🚀 开始部署 Sepolia Geth + Lighthouse 节点..."
 sleep 1
 
 ##############################################
+# 阶段 0：停止现有服务
+##############################################
+sudo systemctl stop geth.service
+sudo systemctl stop lighthouse-beacon.service
+sudo rm -rf /data/lighthouse
+sleep 5
+
+##############################################
 # 阶段 1：准备环境
 ##############################################
 
@@ -56,6 +64,7 @@ if command -v lighthouse &>/dev/null; then
   echo "🔄 检测到旧版本 Lighthouse ($OLD_LH_VER)，将替换为最新版..."
   sudo systemctl stop lighthouse-beacon.service || true
 fi
+
 
 echo "📥 获取 Lighthouse 最新版本下载链接..."
 LATEST_LIGHTHOUSE_URL=$(curl -s https://api.github.com/repos/sigp/lighthouse/releases/latest \
