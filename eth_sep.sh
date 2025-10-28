@@ -8,8 +8,8 @@ sleep 1
 ##############################################
 # 阶段 0：停止现有服务
 ##############################################
-sudo systemctl stop geth.service
-sudo systemctl stop lighthouse-beacon.service
+sudo systemctl stop geth.service || true
+sudo systemctl stop lighthouse-beacon.service || true
 sudo rm -rf /data/lighthouse
 sleep 5
 
@@ -19,39 +19,32 @@ sleep 5
 
 echo "📦 更新系统环境..."
 sudo apt update -y
-sudo apt install -y curl wget tar openssl ufw jq
+sudo apt install -y curl wget tar openssl ufw jq software-properties-common
 
 ##############################################
-# 阶段 2：安装最新 Geth
+# 阶段 2：安装/升级最新 Geth（APT 方式）
 ##############################################
 
 echo "⚙️ 检查旧版 Geth..."
 if command -v geth &>/dev/null; then
   OLD_VER=$(geth version | grep -m1 'Version' | awk '{print $2}')
-  echo "🔄 检测到旧版本 Geth ($OLD_VER)，将替换为最新版..."
+  echo "🔄 检测到旧版本 Geth ($OLD_VER)，准备通过 apt 升级..."
   sudo systemctl stop geth.service || true
+else
+  echo "🆕 未检测到 Geth，将进行全新安装..."
 fi
 
-echo "📥 正在获取 Geth 最新版本下载链接..."
-LATEST_GETH_URL=$(curl -s https://api.github.com/repos/ethereum/go-ethereum/releases/latest \
-  | jq -r '.assets[] | select(.browser_download_url | contains("geth-linux-amd64")) | .browser_download_url')
-
-if [[ -z "$LATEST_GETH_URL" ]]; then
-  echo "❌ 无法获取 Geth 最新版本下载地址，请检查网络。"
-  exit 1
+# 添加官方 Ethereum PPA 仓库（如未添加）
+if ! grep -q "ethereum/ethereum" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+  echo "➕ 添加 Ethereum 官方软件源..."
+  sudo add-apt-repository -y ppa:ethereum/ethereum
 fi
 
-echo "⬇️ 下载 Geth..."
-wget -q -O geth.tar.gz "$LATEST_GETH_URL"
+echo "📥 更新软件包索引并安装/升级 Geth..."
+sudo apt update -y
+sudo apt install -y geth
 
-echo "📦 解压并安装 Geth..."
-tar -xzf geth.tar.gz
-cd geth-linux-amd64-* || { echo "❌ 解压失败"; exit 1; }
-sudo mv geth /usr/bin/geth
-cd ..
-rm -rf geth.tar.gz geth-linux-amd64-*
-
-echo "✅ Geth 安装完成，版本信息："
+echo "✅ Geth 安装/升级完成，当前版本信息："
 geth version | head -n 5
 
 ##############################################
@@ -64,7 +57,6 @@ if command -v lighthouse &>/dev/null; then
   echo "🔄 检测到旧版本 Lighthouse ($OLD_LH_VER)，将替换为最新版..."
   sudo systemctl stop lighthouse-beacon.service || true
 fi
-
 
 echo "📥 获取 Lighthouse 最新版本下载链接..."
 LATEST_LIGHTHOUSE_URL=$(curl -s https://api.github.com/repos/sigp/lighthouse/releases/latest \
@@ -186,7 +178,6 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl daemon-reexec
-
 sudo systemctl enable geth.service
 sudo systemctl enable lighthouse-beacon.service
 
