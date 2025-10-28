@@ -16,7 +16,6 @@ sleep 5
 ##############################################
 # 阶段 1：准备环境
 ##############################################
-
 echo "📦 更新系统环境..."
 sudo apt update -y
 sudo apt install -y curl wget tar openssl ufw jq software-properties-common
@@ -24,7 +23,6 @@ sudo apt install -y curl wget tar openssl ufw jq software-properties-common
 ##############################################
 # 阶段 2：安装/升级最新 Geth（APT 方式 + 智能版本比较）
 ##############################################
-
 echo "⚙️ 检查 Geth 版本状态..."
 
 # 添加官方 Ethereum PPA 仓库（如未添加）
@@ -40,8 +38,13 @@ if command -v geth &>/dev/null; then
   REPO_VER=$(apt-cache policy geth | grep Candidate | awk '{print $2}')
   echo "🔎 本地版本：$LOCAL_VER"
   echo "🔎 仓库版本：$REPO_VER"
-
-  if dpkg --compare-versions "$REPO_VER" gt "$LOCAL_VER"; then
+  
+  # 提取主版本号
+  LOCAL_MAJOR=$(echo "$LOCAL_VER" | cut -d'-' -f1 | cut -d'+' -f1)
+  REPO_MAJOR=$(echo "$REPO_VER" | cut -d'-' -f1 | cut -d'+' -f1)
+  
+  # 双重检查：主版本不同 或 构建版本更高
+  if [ "$REPO_MAJOR" != "$LOCAL_MAJOR" ] || dpkg --compare-versions "$REPO_VER" gt "$LOCAL_VER"; then
     echo "🔄 检测到新版可用，将升级..."
     sudo systemctl stop geth.service || true
     sudo apt install -y --only-upgrade geth
@@ -57,31 +60,13 @@ echo "✅ Geth 安装/升级完成，当前版本信息："
 geth version | head -n 5
 
 ##############################################
-# 阶段 3：安装最新 Lighthouse
+# 阶段 3：安装 Lighthouse v8.0.0-rc.1
 ##############################################
-
-echo "⚙️ 检查旧版 Lighthouse..."
-if command -v lighthouse &>/dev/null; then
-  OLD_LH_VER=$(lighthouse --version | awk '{print $2}')
-  echo "🔄 检测到旧版本 Lighthouse ($OLD_LH_VER)，将替换为最新版..."
-  sudo systemctl stop lighthouse-beacon.service || true
-fi
-
-echo "📥 获取 Lighthouse 最新版本下载链接..."
-LATEST_LIGHTHOUSE_URL=$(curl -s https://api.github.com/repos/sigp/lighthouse/releases/latest \
-  | jq -r '.assets[] | select(.browser_download_url | contains("x86_64-unknown-linux-gnu.tar.gz")) | .browser_download_url')
-
-if [[ -z "$LATEST_LIGHTHOUSE_URL" ]]; then
-  echo "❌ 无法获取 Lighthouse 最新版本下载地址，请检查网络。"
-  exit 1
-fi
-
-echo "⬇️ 下载 Lighthouse..."
-wget -q -O lighthouse.tar.gz "$LATEST_LIGHTHOUSE_URL"
-
-echo "📦 解压并安装 Lighthouse..."
+echo "📥 安装 Lighthouse v8.0.0-rc.1..."
+wget -q https://github.com/sigp/lighthouse/releases/download/v8.0.0-rc.1/lighthouse-v8.0.0-rc.1-x86_64-unknown-linux-gnu.tar.gz -O lighthouse.tar.gz
 tar -xzf lighthouse.tar.gz
-sudo mv lighthouse /usr/local/bin/
+sudo mv lighthouse /usr/local/bin/lighthouse
+sudo chmod +x /usr/local/bin/lighthouse
 rm -f lighthouse.tar.gz
 
 echo "✅ Lighthouse 安装完成，版本信息："
@@ -90,7 +75,6 @@ lighthouse --version
 ##############################################
 # 阶段 4：创建数据目录与 JWT
 ##############################################
-
 echo "📁 创建数据目录与 JWT..."
 sudo mkdir -p /data/geth_sepolia /data/lighthouse_sepolia /data/jwt
 if [[ ! -f /data/jwt/jwt.hex ]]; then
@@ -104,7 +88,6 @@ fi
 ##############################################
 # 阶段 5：创建 systemd 服务
 ##############################################
-
 echo "⚙️ 创建 systemd 服务..."
 
 # Geth 服务
@@ -189,14 +172,12 @@ sudo systemctl daemon-reload
 sudo systemctl daemon-reexec
 sudo systemctl enable geth.service
 sudo systemctl enable lighthouse-beacon.service
-
 sudo systemctl restart geth.service
 sudo systemctl restart lighthouse-beacon.service
 
 ##############################################
 # 阶段 6：配置防火墙
 ##############################################
-
 echo "🔐 配置防火墙 (UFW)..."
 sudo ufw allow 22/tcp
 sudo ufw allow 30303/tcp
@@ -212,7 +193,6 @@ sudo ufw status verbose
 ##############################################
 # 阶段 7：完成信息
 ##############################################
-
 echo ""
 echo "🎉 部署完成！节点已启动。"
 echo ""
