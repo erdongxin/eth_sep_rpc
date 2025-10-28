@@ -22,17 +22,10 @@ sudo apt update -y
 sudo apt install -y curl wget tar openssl ufw jq software-properties-common
 
 ##############################################
-# 阶段 2：安装/升级最新 Geth（APT 方式）
+# 阶段 2：安装/升级最新 Geth（APT 方式 + 智能版本比较）
 ##############################################
 
-echo "⚙️ 检查旧版 Geth..."
-if command -v geth &>/dev/null; then
-  OLD_VER=$(geth version | grep -m1 'Version' | awk '{print $2}')
-  echo "🔄 检测到旧版本 Geth ($OLD_VER)，准备通过 apt 升级..."
-  sudo systemctl stop geth.service || true
-else
-  echo "🆕 未检测到 Geth，将进行全新安装..."
-fi
+echo "⚙️ 检查 Geth 版本状态..."
 
 # 添加官方 Ethereum PPA 仓库（如未添加）
 if ! grep -q "ethereum/ethereum" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
@@ -40,9 +33,25 @@ if ! grep -q "ethereum/ethereum" /etc/apt/sources.list /etc/apt/sources.list.d/*
   sudo add-apt-repository -y ppa:ethereum/ethereum
 fi
 
-echo "📥 更新软件包索引并安装/升级 Geth..."
 sudo apt update -y
-sudo apt install -y geth
+
+if command -v geth &>/dev/null; then
+  LOCAL_VER=$(geth version | grep -m1 'Version' | awk '{print $2}')
+  REPO_VER=$(apt-cache policy geth | grep Candidate | awk '{print $2}')
+  echo "🔎 本地版本：$LOCAL_VER"
+  echo "🔎 仓库版本：$REPO_VER"
+
+  if dpkg --compare-versions "$REPO_VER" gt "$LOCAL_VER"; then
+    echo "🔄 检测到新版可用，将升级..."
+    sudo systemctl stop geth.service || true
+    sudo apt install -y --only-upgrade geth
+  else
+    echo "✅ Geth 已是最新版本，无需升级。"
+  fi
+else
+  echo "🆕 未检测到 Geth，将进行全新安装..."
+  sudo apt install -y geth
+fi
 
 echo "✅ Geth 安装/升级完成，当前版本信息："
 geth version | head -n 5
