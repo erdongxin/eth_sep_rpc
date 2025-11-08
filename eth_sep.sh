@@ -109,6 +109,7 @@ LimitNOFILE=65535
 ExecStart=/usr/bin/geth \\
   --sepolia \\
   --datadir /data/geth_sepolia \\
+  --syncmode snap \\
   --http \\
   --http.addr 0.0.0.0 \\
   --http.port 8545 \\
@@ -160,7 +161,7 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \\
   --metrics \\
   --metrics-address 127.0.0.1 \\
   --metrics-port 5054 \\
-  --checkpoint-sync-url https://sepolia.checkpoint-sync.ethpandaops.io/ \\
+  --allow-insecure-genesis-sync \\
   --disable-upnp \\
   --supernode
 
