@@ -10,7 +10,7 @@ sleep 1
 ##############################################
 sudo systemctl stop geth.service || true
 sudo systemctl stop lighthouse-beacon.service || true
-sudo rm -rf /data/lighthouse
+sudo rm -rf /data/lighthouse_sepolia
 sleep 5
 
 ##############################################
@@ -60,10 +60,10 @@ echo "✅ Geth 安装/升级完成，当前版本信息："
 geth version | head -n 5
 
 ##############################################
-# 阶段 3：安装 Lighthouse v8.0.0-rc.1
+# 阶段 3：安装 Lighthouse v8.0.0 正式版
 ##############################################
-echo "📥 安装 Lighthouse v8.0.0-rc.1..."
-wget -q https://github.com/sigp/lighthouse/releases/download/v8.0.0-rc.1/lighthouse-v8.0.0-rc.1-x86_64-unknown-linux-gnu.tar.gz -O lighthouse.tar.gz
+echo "📥 安装 Lighthouse v8.0.0 正式版..."
+wget -q https://github.com/sigp/lighthouse/releases/download/v8.0.0/lighthouse-v8.0.0-x86_64-unknown-linux-gnu.tar.gz -O lighthouse.tar.gz
 tar -xzf lighthouse.tar.gz
 sudo mv lighthouse /usr/local/bin/lighthouse
 sudo chmod +x /usr/local/bin/lighthouse
@@ -71,6 +71,7 @@ rm -f lighthouse.tar.gz
 
 echo "✅ Lighthouse 安装完成，版本信息："
 lighthouse --version
+
 
 ##############################################
 # 阶段 4：创建数据目录与 JWT
@@ -126,7 +127,7 @@ ExecStart=/usr/bin/geth \\
   --metrics \\
   --metrics.addr 127.0.0.1 \\
   --metrics.port 6060 \\
-  --cache=2048 \\
+  --cache=1024 \\
   --maxpeers 50 \\
   --rpc.txfeecap 0
 
