@@ -126,8 +126,8 @@ ExecStart=/usr/bin/geth \\
   --metrics \\
   --metrics.addr 127.0.0.1 \\
   --metrics.port 6060 \\
-  --cache=1024 \\
-  --maxpeers 50 \\
+  --cache=8192 \\
+  --maxpeers 250 \\
   --rpc.txfeecap 0
 
 [Install]
