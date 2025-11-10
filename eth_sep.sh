@@ -10,7 +10,6 @@ sleep 1
 ##############################################
 sudo systemctl stop geth.service || true
 sudo systemctl stop lighthouse-beacon.service || true
-sudo rm -rf /data/lighthouse_sepolia
 sleep 5
 
 ##############################################
