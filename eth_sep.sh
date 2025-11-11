@@ -161,7 +161,7 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \\
   --metrics \\
   --metrics-address 127.0.0.1 \\
   --metrics-port 5054 \\
-  --allow-insecure-genesis-sync \\
+  --checkpoint-sync-url https://beaconstate-sepolia.chainsafe.io \\
   --disable-upnp \\
   --supernode
 
