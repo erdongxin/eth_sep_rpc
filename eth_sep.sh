@@ -164,7 +164,6 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \
   --http \
   --http-address 127.0.0.1 \
   --http-port 5053 \
-  --http-max-body-size 50MB \
   --metrics \
   --metrics-address 127.0.0.1 \
   --metrics-port 5054 \
