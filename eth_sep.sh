@@ -200,8 +200,6 @@ server {
         proxy_request_buffering off;    # 关闭请求缓冲
     }
 }
-
-}
 EOF
 
 sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/lighthouse_rpc.conf
