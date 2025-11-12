@@ -140,7 +140,7 @@ ExecStart=/usr/bin/geth \
 WantedBy=multi-user.target
 EOF
 
-# Lighthouse 服务（HTTP 只监听回环地址）
+# Lighthouse 服务（内部监听 5053）
 sudo tee /etc/systemd/system/lighthouse-beacon.service >/dev/null <<EOF
 [Unit]
 Description=Lighthouse Sepolia Consensus Layer Client (Beacon Node)
@@ -163,7 +163,7 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \
   --execution-jwt /data/jwt/jwt.hex \
   --http \
   --http-address 127.0.0.1 \
-  --http-port 5052 \
+  --http-port 5053 \
   --metrics \
   --metrics-address 127.0.0.1 \
   --metrics-port 5054 \
@@ -191,7 +191,7 @@ server {
     listen 0.0.0.0:5052;
 
     location / {
-        proxy_pass http://127.0.0.1:5052;
+        proxy_pass http://127.0.0.1:5053;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_read_timeout 60s;
