@@ -39,7 +39,7 @@ echo "⚙️ 配置 Nginx 反向代理 Lighthouse RPC..."
 NGINX_CONF="/etc/nginx/sites-available/lighthouse_rpc.conf"
 sudo tee $NGINX_CONF >/dev/null <<EOF
 server {
-    listen 5052;
+    listen 0.0.0.0:5052;
 
     location / {
         proxy_pass http://127.0.0.1:5052;
