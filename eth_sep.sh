@@ -164,6 +164,8 @@ ExecStart=/usr/local/bin/lighthouse beacon_node \
   --http \
   --http-address 127.0.0.1 \
   --http-port 5053 \
+  --http-max-connections 1024 \
+  --http-max-body-size 50MB \
   --metrics \
   --metrics-address 127.0.0.1 \
   --metrics-port 5054 \
@@ -193,7 +195,7 @@ server {
         proxy_pass http://127.0.0.1:5053;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
-        proxy_read_timeout 600s;        # 延长读取超时
+        proxy_read_timeout 300s;        # 延长读取超时
         proxy_connect_timeout 180s;      # 延长连接超时
 
         proxy_buffering off;            # 关闭缓冲
