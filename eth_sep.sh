@@ -229,14 +229,14 @@ sudo ufw status verbose
 ##############################################
 # 阶段 9：完成信息
 ##############################################
-echo "\n🎉 部署完成！节点已启动。"
+echo "🎉 部署完成！节点已启动。"
 echo "🧠 当前版本信息："
 echo "   → Geth: $(geth version | grep -m1 'Version')"
 echo "   → Lighthouse: $(lighthouse --version)"
-echo "\n📊 查看日志："
+echo "📊 查看日志："
 echo "   sudo journalctl -fu geth.service"
 echo "   sudo journalctl -fu lighthouse-beacon.service"
-echo "\n🔍 查看同步状态："
+echo "🔍 查看同步状态："
 echo "   curl -X POST --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' -H 'Content-Type: application/json' localhost:8545"
 echo "   curl http://127.0.0.1:5052/eth/v1/node/syncing"
-echo "\n✅ 如果 Geth 和 Lighthouse 都返回 false，则节点同步完成。"
+echo "✅ 如果 Geth 和 Lighthouse 都返回 false，则节点同步完成。"
