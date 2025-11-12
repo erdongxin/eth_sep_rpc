@@ -189,19 +189,18 @@ NGINX_CONF="/etc/nginx/sites-available/lighthouse_rpc.conf"
 sudo tee $NGINX_CONF >/dev/null <<EOF
 server {
     listen 0.0.0.0:5052;
-
     location / {
         proxy_pass http://127.0.0.1:5053;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
-        proxy_read_timeout 60s;
-        proxy_connect_timeout 10s;
+        proxy_read_timeout 300s;        # 延长读取超时
+        proxy_connect_timeout 60s;      # 延长连接超时
 
-        proxy_buffering on;
-        proxy_buffers 16 64k;
-        proxy_busy_buffers_size 128k;
-        proxy_max_temp_file_size 256k;
+        proxy_buffering off;            # 关闭缓冲
+        proxy_request_buffering off;    # 关闭请求缓冲
     }
+}
+
 }
 EOF
 
