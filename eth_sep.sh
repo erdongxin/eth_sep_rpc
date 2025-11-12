@@ -194,7 +194,7 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_read_timeout 300s;        # 延长读取超时
-        proxy_connect_timeout 60s;      # 延长连接超时
+        proxy_connect_timeout 180s;      # 延长连接超时
 
         proxy_buffering off;            # 关闭缓冲
         proxy_request_buffering off;    # 关闭请求缓冲
